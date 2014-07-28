@@ -33,6 +33,10 @@
                 $tip[0].className = 'tipsy'; // reset classname in case of dynamic gravity
                 $tip.remove().css({top: 0, left: 0, visibility: 'hidden', display: 'block'}).prependTo(document.body);
 
+                if (this.options.className) {
+                    $tip.addClass(maybeCall(this.options.className, this.$element[0]));
+                }
+
                 var pos = $.extend({}, this.$element.offset(), {
                     width: this.$element[0].offsetWidth,
                     height: this.$element[0].offsetHeight
@@ -54,7 +58,7 @@
                         tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth - this.options.offset};
                         break;
                     case 'w':
-                        tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width + this.options.offset};
+                        tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width + this.onnnnnptions.offset};
                         break;
                     default:
                         break;
@@ -80,9 +84,6 @@
 
                 $tip.css(tp).addClass('tipsy-' + gravity);
                 $tip.find('.tipsy-arrow')[0].className = 'tipsy-arrow tipsy-arrow-' + gravity.charAt(0);
-                if (this.options.className) {
-                    $tip.addClass(maybeCall(this.options.className, this.$element[0]));
-                }
 
                 if (this.options.fade) {
                     $tip.stop().css({opacity: 0, display: 'block', visibility: 'visible'}).animate({opacity: this.options.opacity});
