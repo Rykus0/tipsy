@@ -60,7 +60,7 @@
                         tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth - this.options.offset};
                         break;
                     case 'w':
-                        tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width + this.onnnnnptions.offset};
+                        tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width + this.options.offset};
                         break;
                     default:
                         break;
@@ -158,6 +158,7 @@
     };
 
     $.fn.tipsy = function(options) {
+        var $this = this;
 
         if (options === true) {
             return this.data('tipsy');
@@ -178,9 +179,15 @@
             return tipsy;
         }
 
-        function enter() {
+        function enter(e) {
             var tipsy = get(this);
+
+            leaveAll(); // Close all other open tooltips first
+
+            e.stopPropagation();
+
             tipsy.hoverState = 'in';
+
             if (options.delayIn === 0) {
                 tipsy.show();
             } else {
@@ -191,7 +198,9 @@
 
         function leave() {
             var tipsy = get(this);
+
             tipsy.hoverState = 'out';
+
             if (options.delayOut === 0) {
                 tipsy.hide();
             } else {
@@ -199,11 +208,17 @@
             }
         }
 
+        function leaveAll(){
+            $this.each(function(){
+                leave.call(this);
+            });
+        }
+
         if (!options.live) this.each(function() { get(this); });
 
         if (options.trigger != 'manual') {
-            var eventIn  = 'focus';
-            var eventOut = 'blur';
+            var eventIn  = 'touchstart focus';
+            var eventOut = 'touchmove touchcancel blur';
 
             if (options.trigger != 'focus') {
                 eventIn  += ' mouseenter';
@@ -215,6 +230,8 @@
             } else {
               this.on(eventIn, enter).on(eventOut, leave);
             }
+
+            $(this.context).on('touchstart orientationchange', leaveAll);
         }
 
         return this;
