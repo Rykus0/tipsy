@@ -28,41 +28,26 @@
     Tipsy.prototype = {
         show: function() {
             var title = this.getTitle();
-            if (title && this.enabled) {
-                var $tip = this.tip();
 
-                $tip.find('.tipsy-inner')[this.options.html ? 'html' : 'text'](title);
-                $tip[0].className = 'tipsy'; // reset classname in case of dynamic gravity
-                $tip.remove().css({top: 0, left: 0, visibility: 'hidden', display: 'block'}).prependTo(document.body);
-
-                if (this.options.className) {
-                    $tip.addClass(maybeCall(this.options.className, this.$element[0]));
-                }
-
-                var pos = $.extend({}, this.$element.offset(), {
-                    width: this.$element[0].offsetWidth,
-                    height: this.$element[0].offsetHeight
-                });
-
-                var actualWidth = $tip[0].offsetWidth,
-                    actualHeight = $tip[0].offsetHeight,
-                    gravity = maybeCall(this.options.gravity, this.$element[0]);
-
+            var calculatePosition = function(self){
                 var tp;
+                var pos = self.$element[0].getBoundingClientRect();
+
+                var actualWidth  = $tip[0].offsetWidth;
+                var actualHeight = $tip[0].offsetHeight;
+
                 switch (gravity.charAt(0)) {
                     case 'n':
-                        tp = {top: pos.top + pos.height + this.options.offset, left: pos.left + pos.width / 2 - actualWidth / 2};
+                        tp = {top: pos.top + pos.height + self.options.offset, left: pos.left + pos.width / 2 - actualWidth / 2};
                         break;
                     case 's':
-                        tp = {top: pos.top - actualHeight - this.options.offset, left: pos.left + pos.width / 2 - actualWidth / 2};
+                        tp = {top: pos.top - actualHeight - self.options.offset, left: pos.left + pos.width / 2 - actualWidth / 2};
                         break;
                     case 'e':
-                        tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth - this.options.offset};
+                        tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth - self.options.offset};
                         break;
                     case 'w':
-                        tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width + this.options.offset};
-                        break;
-                    default:
+                        tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width + self.options.offset};
                         break;
                 }
 
@@ -77,6 +62,8 @@
                         gravity = gravity.charAt(0) + autoDir;
                     }
 
+                    // NOTE: 15 here corresponds to 3 * arrow size (border-width on the arrow in CSS)
+                    // Or more accurately, outer padding + (2 * arrow size)
                     if (gravity.charAt(1) == 'w') {
                         tp.left = pos.left + pos.width / 2 - 15;
                     } else if (gravity.charAt(1) == 'e') {
@@ -84,7 +71,31 @@
                     }
                 }
 
-                $tip.css(tp).addClass('tipsy-' + gravity);
+                // If the tooltip is kicked off the left of the screen, it won't resize automatically.
+                if( tp.left < 0 ){
+                    // TODO: '15' is for the arrow... put this in a variable/calculation
+                    // reduce width by amount offscreen. remember: tp.left is negative
+                    tp.width = actualWidth + tp.left - self.options.offset - 15;
+                    tp.left  = 0;
+                }
+
+                return tp;
+            };
+
+            if (title && this.enabled) {
+                var $tip = this.tip();
+                var gravity = maybeCall(this.options.gravity, this.$element[0]);
+
+                $tip.find('.tipsy-inner')[this.options.html ? 'html' : 'text'](title);
+                $tip[0].className = 'tipsy'; // reset classname in case of dynamic gravity
+                $tip.remove().css({top: 0, left: 0, visibility: 'hidden', display: 'block'}).prependTo(document.body);
+
+                if (this.options.className) {
+                    $tip.addClass(maybeCall(this.options.className, this.$element[0]));
+                }
+
+                // Need to recalculate once it is in position because dimensions may have changed
+                $tip.css(calculatePosition(this)).css(calculatePosition(this)).addClass('tipsy-' + gravity);
                 $tip.find('.tipsy-arrow')[0].className = 'tipsy-arrow tipsy-arrow-' + gravity.charAt(0);
 
                 if (this.options.fade) {
