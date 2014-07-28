@@ -1,7 +1,9 @@
 // tipsy, facebook style tooltips for jquery
-// version 1.0.0a
+// version 1.0.0b
 // (c) 2008-2010 jason frame [jason@onehackoranother.com]
 // released under the MIT license
+
+// modified by patrick h. lauke [redux@splintered.co.uk] for increased keyboard and assistive technology accessibility July 2013
 
 (function($) {
 
@@ -102,9 +104,19 @@
         },
 
         fixTitle: function() {
-            var $e = this.$element;
-            if ($e.attr('title') || typeof($e.attr('original-title')) != 'string') {
-                $e.attr('original-title', $e.attr('title') || '').removeAttr('title');
+            var $e = this.$element,
+                id = maybeCall(this.options.id, this.$element[0]);
+            if ($e.attr('title') || typeof($e.attr('data-title')) != 'string') {
+                $e.attr('data-title', $e.attr('title') || '').removeAttr('title');
+                // add aria-describedby pointing to the tooltip's id
+                $e.attr('aria-describedby', id);
+                // if it doesn't already have a tabindex, force the trigger element into the tab cycle
+                // to make it keyboard accessible with tabindex=0. this automatically makes elements
+                // that are not normally keyboard accessible (div or span) that have been tipsy-fied
+                // also operable with the keyboard.
+                if ($e.attr('tabindex') === undefined) {
+                    $e.attr('tabindex', 0);
+                }
             }
         },
 
@@ -112,7 +124,7 @@
             var title, $e = this.$element, o = this.options;
             this.fixTitle();
             if (typeof o.title == 'string') {
-                title = $e.attr(o.title == 'title' ? 'original-title' : o.title);
+                title = $e.attr(o.title == 'title' ? 'data-title' : o.title);
             } else if (typeof o.title == 'function') {
                 title = o.title.call($e[0]);
             }
@@ -121,8 +133,12 @@
         },
 
         tip: function() {
+            var id = maybeCall(this.options.id, this.$element[0]);
+
             if (!this.$tip) {
-                this.$tip = $('<div class="tipsy"></div>').html('<div class="tipsy-arrow"></div><div class="tipsy-inner"></div>');
+                // generate tooltip, with appropriate ARIA role and an 'id' (can be set in options),
+                // so it can be targetted by aria-describedby in the trigger element
+                this.$tip = $('<div class="tipsy" id="'+id+'" role="tooltip"></div>').html('<div class="tipsy-arrow"></div><div class="tipsy-inner"></div>');
                 this.$tip.data('tipsy-pointee', this.$element[0]);
             }
             return this.$tip;
@@ -186,9 +202,15 @@
         if (!options.live) this.each(function() { get(this); });
 
         if (options.trigger != 'manual') {
-            var eventIn  = options.trigger == 'hover' ? 'mouseenter' : 'focus',
-                eventOut = options.trigger == 'hover' ? 'mouseleave' : 'blur';
-            if(options.live){
+            var eventIn  = 'focus';
+            var eventOut = 'blur';
+
+            if (options.trigger != 'focus') {
+                eventIn  += ' mouseenter';
+                eventOut += ' mouseleave';
+            }
+
+            if (options.live) {
               $(this.context).on(eventIn, this.selector, enter).on(eventOut, this.selector, leave);
             } else {
               this.on(eventIn, enter).on(eventOut, leave);
@@ -201,6 +223,7 @@
 
     $.fn.tipsy.defaults = {
         className: null,
+        id: 'tipsy',
         delayIn: 0,
         delayOut: 0,
         fade: false,
@@ -211,7 +234,7 @@
         offset: 0,
         opacity: 0.8,
         title: 'title',
-        trigger: 'hover'
+        trigger: 'interactive'
     };
 
     $.fn.tipsy.revalidate = function() {
