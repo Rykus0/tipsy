@@ -6,12 +6,12 @@
 (function($) {
 
     function maybeCall(thing, ctx) {
-        return (typeof thing == 'function') ? (thing.call(ctx)) : thing;
+        return (typeof thing === 'function') ? (thing.call(ctx)) : thing;
     };
 
     function isElementInDOM(ele) {
       while (ele = ele.parentNode) {
-        if (ele == document) return true;
+        if (ele === document) return true;
       }
       return false;
     };
@@ -53,8 +53,8 @@
                         break;
                 }
 
-                if (gravity.length == 2) {
-                    if (gravity.charAt(1) == 'a') {
+                if (gravity.length === 2) {
+                    if (gravity.charAt(1) === 'a') {
                         var autoDir = '';
                         if (tp.left < 0) {
                             autoDir = 'w';
@@ -66,9 +66,9 @@
 
                     // NOTE: 15 here corresponds to 3 * arrow size (border-width on the arrow in CSS)
                     // Or more accurately, outer padding + (2 * arrow size)
-                    if (gravity.charAt(1) == 'w') {
+                    if (gravity.charAt(1) === 'w') {
                         tp.left = pos.left + pos.width / 2 - 15;
-                    } else if (gravity.charAt(1) == 'e') {
+                    } else if (gravity.charAt(1) === 'e') {
                         tp.left = pos.left + pos.width / 2 - actualWidth + 15;
                     }
                 }
@@ -185,7 +185,7 @@
 
         if (options === true) {
             return this.data('tipsy');
-        } else if (typeof options == 'string') {
+        } else if (typeof options === 'string') {
             var tipsy = this.data('tipsy');
             if (tipsy) tipsy[options]();
             return this;
@@ -215,7 +215,7 @@
                 tipsy.show();
             } else {
                 tipsy.fixTitle();
-                setTimeout(function() { if (tipsy.hoverState == 'in') tipsy.show(); }, options.delayIn);
+                setTimeout(function() { if (tipsy.hoverState === 'in') tipsy.show(); }, options.delayIn);
             }
         }
 
@@ -227,7 +227,7 @@
             if (options.delayOut === 0) {
                 tipsy.hide();
             } else {
-                setTimeout(function() { if (tipsy.hoverState == 'out') tipsy.hide(); }, options.delayOut);
+                setTimeout(function() { if (tipsy.hoverState === 'out') tipsy.hide(); }, options.delayOut);
             }
         }
 
@@ -243,11 +243,11 @@
             get(this);
         });
 
-        if (options.trigger != 'manual') {
+        if (options.trigger !== 'manual') {
             var eventIn  = 'touchstart focus';
             var eventOut = 'touchmove touchcancel blur';
 
-            if (options.trigger != 'focus') {
+            if (options.trigger !== 'focus') {
                 eventIn  += ' mouseenter';
                 eventOut += ' mouseleave';
             }
