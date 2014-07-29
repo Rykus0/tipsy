@@ -3,8 +3,6 @@
 // (c) 2008-2010 jason frame [jason@onehackoranother.com]
 // released under the MIT license
 
-// modified by patrick h. lauke [redux@splintered.co.uk] for increased keyboard and assistive technology accessibility July 2013
-
 (function($) {
 
     function maybeCall(thing, ctx) {
@@ -119,31 +117,41 @@
         },
 
         fixTitle: function() {
-            var $e = this.$element,
-                id = maybeCall(this.options.id, this.$element[0]);
-            if ($e.attr('title') || typeof($e.attr('data-title')) != 'string') {
+            var $e = this.$element;
+            var id = maybeCall(this.options.id, this.$element[0]);
+
+            // Remove title attribute to prevent system tooltips and store value in data-title
+            if ($e.attr('title') || typeof($e.attr('data-title')) !== 'string') {
                 $e.attr('data-title', $e.attr('title') || '').removeAttr('title');
-                // add aria-describedby pointing to the tooltip's id
-                $e.attr('aria-describedby', id);
-                // if it doesn't already have a tabindex, force the trigger element into the tab cycle
-                // to make it keyboard accessible with tabindex=0. this automatically makes elements
-                // that are not normally keyboard accessible (div or span) that have been tipsy-fied
-                // also operable with the keyboard.
-                if ($e.attr('tabindex') === undefined) {
-                    $e.attr('tabindex', 0);
-                }
+            }
+
+            // add aria-describedby pointing to the tooltip's id
+            $e.attr('aria-describedby', id);
+
+            // if it doesn't already have a tabindex, force the trigger element into the tab cycle
+            // to make it keyboard accessible with tabindex=0. this automatically makes elements
+            // that are not normally keyboard accessible (div or span) that have been tipsy-fied
+            // also operable with the keyboard.
+            if ($e.attr('tabindex') === undefined) {
+                $e.attr('tabindex', 0);
             }
         },
 
         getTitle: function() {
-            var title, $e = this.$element, o = this.options;
+            var title;
+            var $e = this.$element;
+            var o  = this.options;
+
             this.fixTitle();
-            if (typeof o.title == 'string') {
-                title = $e.attr(o.title == 'title' ? 'data-title' : o.title);
-            } else if (typeof o.title == 'function') {
+
+            if (typeof o.title === 'string') {
+                title = $e.attr(o.title === 'title' ? 'data-title' : o.title);
+            } else if (typeof o.title === 'function') {
                 title = o.title.call($e[0]);
             }
+
             title = ('' + title).replace(/(^\s*|\s*$)/, "");
+
             return title || o.fallback;
         },
 
@@ -229,7 +237,11 @@
             });
         }
 
-        if (!options.live) this.each(function() { get(this); });
+        // Initialize any on-page tooltips
+        // Tooltips added later (options.live) will be initialized on first activation
+        this.each(function(){
+            get(this);
+        });
 
         if (options.trigger != 'manual') {
             var eventIn  = 'touchstart focus';
