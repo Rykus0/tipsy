@@ -1,7 +1,15 @@
-// tipsy, facebook style tooltips for jquery
-// version 1.0.0b
-// (c) 2008-2010 jason frame [jason@onehackoranother.com]
-// released under the MIT license
+/**
+ * @file
+ * <p>tipsy, facebook style tooltips for jquery.</p>
+ * <p>Forked and updated from original.</p>
+ *
+ * @see {@link https://github.com/Rykus0/tipsy}
+ * @version 1.0.0b
+ * @author Jason Frame <jason@onehackoranother.com>
+ * @copyright 2008-2010 Jason Frame <jason@onehackoranother.com>
+ * @license MIT
+ *
+ */
 
 (function($) {
 
@@ -26,6 +34,7 @@
     Tipsy.prototype = {
         show: function() {
             var title = this.getTitle();
+            var me    = this;
 
             var calculatePosition = function(self){
                 var tp;
@@ -95,6 +104,11 @@
                 if (this.options.className) {
                     $tip.addClass(maybeCall(this.options.className, this.$element[0]));
                 }
+
+                // If there are any images, adjust position after they load
+                $tip.find('.tipsy-inner img').on('load', function(){
+                    $tip.css(calculatePosition(me));
+                })
 
                 // Need to recalculate once it is in position because dimensions may have changed
                 $tip.css(calculatePosition(this)).css(calculatePosition(this)).addClass('tipsy-' + gravity);
@@ -180,6 +194,10 @@
         toggleEnabled: function() { this.enabled = !this.enabled; }
     };
 
+    /**
+     * @memberof jQuery
+     * @alias tipsy
+     */
     $.fn.tipsy = function(options) {
         var $this = this;
 
@@ -290,10 +308,12 @@
       });
     };
 
-    // Overwrite this method to provide options on a per-element basis.
-    // For example, you could store the gravity in a 'tipsy-gravity' attribute:
-    // return $.extend({}, options, {gravity: $(ele).attr('tipsy-gravity') || 'n' });
-    // (remember - do not modify 'options' in place!)
+    /**
+     * Overwrite this method to provide options on a per-element basis.
+     * For example, you could store the gravity in a 'tipsy-gravity' attribute:
+     * return $.extend({}, options, {gravity: $(ele).attr('tipsy-gravity') || 'n' });
+     * (remember - do not modify 'options' in place!)
+     */
     $.fn.tipsy.elementOptions = function(ele, options) {
         return $.metadata ? $.extend({}, options, $(ele).metadata()) : options;
     };
