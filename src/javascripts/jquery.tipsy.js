@@ -277,6 +277,7 @@
             }
 
             $(this.context).on('touchstart orientationchange', leaveAll);
+            $('*').on('scroll', leaveAll);
         }
 
         return this;
