@@ -108,11 +108,19 @@
                 // If there are any images, adjust position after they load
                 $tip.find('.tipsy-inner img').on('load', function(){
                     $tip.css(calculatePosition(me));
-                })
+                });
 
                 // Need to recalculate once it is in position because dimensions may have changed
                 $tip.css(calculatePosition(this)).css(calculatePosition(this)).addClass('tipsy-' + gravity);
                 $tip.find('.tipsy-arrow')[0].className = 'tipsy-arrow tipsy-arrow-' + gravity.charAt(0);
+
+                // Don't close if mouse is over the tooltip
+                var myTipsy = this;
+                $tip
+                    .on('mouseenter', function(){myTipsy.hoverState = 'in'; })
+                    .on('mouseleave', function(){myTipsy.hoverState = 'out'; myTipsy.hide();})
+                ;
+
 
                 if (this.options.fade) {
                     $tip.stop().css({opacity: 0, display: 'block', visibility: 'visible'}).animate({opacity: this.options.opacity});
